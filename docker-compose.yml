@@ -1,0 +1,47 @@
+services:
+  wireguard:
+    # 使用 LinuxServer.io 維護的 WireGuard 映像。
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: wireguard-server
+    restart: unless-stopped
+    cap_add:
+      # 允許容器建立 WireGuard 介面與調整路由。
+      - NET_ADMIN
+      # 若主機沒有自動載入所需核心模組，容器可嘗試載入。
+      - SYS_MODULE
+    environment:
+      # 讓容器寫出的設定檔與主機使用同一個使用者權限，避免權限衝突。
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-1000}"
+      TZ: "${TZ:-Asia/Taipei}"
+
+      # 對外公開的 DDNS 或公開 IP。
+      SERVERURL: "${WG_SERVER_URL}"
+      # Router 要轉發進來的外部 UDP port。
+      SERVERPORT: "${WG_SERVER_PORT:-51820}"
+
+      # 可以是 0、數字，或逗號分隔的 peer 名稱清單。
+      # 這份專案預設用名稱清單模式，方便後續單獨撤銷某台裝置。
+      PEERS: "${WG_PEERS:-0}"
+
+      # Peer 匯入後使用的 DNS，可填單一 IP 或逗號分隔多組 DNS。
+      PEERDNS: "${WG_PEER_DNS:-1.1.1.1}"
+      # WireGuard 內部虛擬網段的起始子網。
+      INTERNAL_SUBNET: "${WG_INTERNAL_SUBNET:-10.13.13.0}"
+      # Full tunnel：所有 IPv4 流量都走家中 WireGuard 出口。
+      ALLOWEDIPS: "${WG_ALLOWEDIPS:-0.0.0.0/0}"
+      # 讓行動裝置在 NAT 後方也比較穩定維持連線。
+      PERSISTENTKEEPALIVE_PEERS: "${WG_PERSISTENTKEEPALIVE_PEERS:-all}"
+      # 避免把 peer 設定全文直接打進 docker logs。
+      LOG_CONFS: "${WG_LOG_CONFS:-false}"
+    volumes:
+      # 儲存 WireGuard 伺服器與 peer 的設定、金鑰、QR 檔案。
+      - ./wireguard-data:/config
+      # 讓容器在需要時能讀取主機核心模組資訊。
+      - /lib/modules:/lib/modules:ro
+    ports:
+      # 對外開放 WireGuard UDP port。
+      - "${WG_SERVER_PORT:-51820}:51820/udp"
+    sysctls:
+      # WireGuard server mode 所需的 sysctl。
+      net.ipv4.conf.all.src_valid_mark: "1"

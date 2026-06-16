@@ -1,0 +1,10 @@
+# 本機實際部署參數，可能包含公開 IP、DDNS 與 peer 名稱。
+.env
+
+# WireGuard server 設定、金鑰與自動產生的 peer 檔案都屬於敏感資料。
+wireguard-data/*
+!wireguard-data/.gitkeep
+
+# 匯出的 client 設定檔與 QR 圖片屬於敏感資料，不進版控。
+clients/*
+!clients/.gitkeep
