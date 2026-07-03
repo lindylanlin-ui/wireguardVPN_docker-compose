@@ -1,0 +1,11 @@
+/home/tuffy/project/wireguard_vpn_docker-compose/logs/*.log {
+    su tuffy tuffy
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    dateext
+    copytruncate
+}

@@ -4,6 +4,15 @@ services:
     image: lscr.io/linuxserver/wireguard:latest
     container_name: wireguard-server
     restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+    command:
+      - >
+        exec /init
+        >> /var/log/project/wireguard.log 2>&1
+    logging:
+      driver: none
     cap_add:
       # 允許容器建立 WireGuard 介面與調整路由。
       - NET_ADMIN
@@ -39,6 +48,7 @@ services:
       - ./wireguard-data:/config
       # 讓容器在需要時能讀取主機核心模組資訊。
       - /lib/modules:/lib/modules:ro
+      - ./logs:/var/log/project
     ports:
       # 對外開放 WireGuard UDP port。
       - "${WG_SERVER_PORT:-51820}:51820/udp"

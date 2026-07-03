@@ -8,3 +8,6 @@ wireguard-data/*
 # 匯出的 client 設定檔與 QR 圖片屬於敏感資料，不進版控。
 clients/*
 !clients/.gitkeep
+logs/*.log
+logs/*.log-*
+logs/*.gz
